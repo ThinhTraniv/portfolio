@@ -14,3 +14,45 @@ snapshotDialog.addEventListener('click', event => {
   const bounds = snapshotDialog.getBoundingClientRect();
   if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) snapshotDialog.close();
 });
+
+// Experience and research recognition gallery.
+const galleryDialog = document.querySelector('#gallery-dialog');
+const galleryImage = document.querySelector('#gallery-image');
+const gallerySource = document.querySelector('#gallery-source');
+const galleryPrevious = document.querySelector('#gallery-prev');
+const galleryNext = document.querySelector('#gallery-next');
+let galleryItems = [];
+let galleryIndex = 0;
+function renderGalleryPhoto() {
+  const item = galleryItems[galleryIndex];
+  galleryImage.src = item.dataset.full;
+  galleryImage.alt = item.dataset.caption;
+  document.querySelector('#gallery-caption').textContent = item.dataset.caption;
+  document.querySelector('#gallery-credit').textContent = item.dataset.credit;
+  document.querySelector('#gallery-position').textContent = `${galleryIndex + 1} / ${galleryItems.length}`;
+  gallerySource.hidden = !item.dataset.source;
+  if (item.dataset.source) gallerySource.href = item.dataset.source;
+  else gallerySource.removeAttribute('href');
+  galleryPrevious.disabled = galleryIndex === 0;
+  galleryNext.disabled = galleryIndex === galleryItems.length - 1;
+}
+document.querySelectorAll('.gallery-photo').forEach(button => {
+  button.addEventListener('click', () => {
+    galleryItems = [...document.querySelectorAll('.gallery-photo')].filter(item => item.dataset.gallery === button.dataset.gallery);
+    galleryIndex = galleryItems.indexOf(button);
+    renderGalleryPhoto();
+    galleryDialog.showModal();
+  });
+});
+galleryPrevious.addEventListener('click', () => { if (galleryIndex > 0) { galleryIndex--; renderGalleryPhoto(); } });
+galleryNext.addEventListener('click', () => { if (galleryIndex < galleryItems.length - 1) { galleryIndex++; renderGalleryPhoto(); } });
+document.querySelector('#gallery-close').addEventListener('click', () => galleryDialog.close());
+galleryDialog.addEventListener('keydown', event => {
+  if (event.key === 'ArrowLeft') { event.preventDefault(); galleryPrevious.click(); }
+  if (event.key === 'ArrowRight') { event.preventDefault(); galleryNext.click(); }
+});
+galleryDialog.addEventListener('click', event => {
+  if (event.target !== galleryDialog) return;
+  const bounds = galleryDialog.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) galleryDialog.close();
+});
